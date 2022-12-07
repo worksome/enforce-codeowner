@@ -1,15 +1,24 @@
-name: test
-on: pull_request
+name: Tests
+
+on: [push]
 
 jobs:
   test:
+    name: Node.js
+
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - run: yarn
-      - run: yarn jest
-        env:
-          INTEGRATION_TEST: true
-          INPUT_CODEOWNERS_PATH: ./__tests__/data/CODEOWNERS
-          GITHUB_TOKEN: '{{secrets.GITHUB_TOKEN}}'
-          INPUT_POST_COMMENT: true
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install Node.js dependencies
+        run: npm install
+
+      - name: Run Tests
+        run: npm run test
