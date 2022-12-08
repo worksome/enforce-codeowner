@@ -24,10 +24,17 @@ Enable checkboxes when listing the files in the comment. The default value is `f
 
 The token used to authenticate with GitHub and post the comments on the PR. Defaults to `github.token`.
 
+## Outputs
+
+### `comment`
+
+The output comment that should be posted on the pull request.
+
 ## Example usage
 
 ```yaml
 - name: Enforce Codeowners
+  id: enforce-codeowners
   uses: worksome/enforce-codeowner@v1
   with:
     codeOwnersPath: '.github/CODEOWNERS'

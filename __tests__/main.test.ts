@@ -6,8 +6,8 @@ jest.mock('@actions/core')
 jest.mock('@actions/github')
 
 const gh = github.getOctokit('_')
-const createCommentMock = jest.spyOn(gh.rest.issues, 'createComment')
 const paginateMock = jest.spyOn(gh, 'paginate')
+const setOutputMock = jest.spyOn(core, 'setOutput')
 
 afterAll(() => jest.restoreAllMocks())
 
@@ -44,13 +44,8 @@ describe('run', () => {
 
     await run()
 
-    expect(createCommentMock).toHaveBeenCalledTimes(1)
-    expect(createCommentMock).toHaveBeenCalledWith({
-      owner: 'worksome',
-      repo: 'enforce-codeowner',
-      issue_number: 123,
-      body: '- `bar.txt`',
-    })
+    expect(setOutputMock).toHaveBeenCalledTimes(1)
+    expect(setOutputMock).toHaveBeenCalledWith('comment', '- `bar.txt`')
   })
 
   it('adds a comment with checkboxes when changed files do not have a code owner', async () => {
@@ -60,13 +55,8 @@ describe('run', () => {
 
     await run()
 
-    expect(createCommentMock).toHaveBeenCalledTimes(1)
-    expect(createCommentMock).toHaveBeenCalledWith({
-      owner: 'worksome',
-      repo: 'enforce-codeowner',
-      issue_number: 123,
-      body: '- [ ] `bar.txt`',
-    })
+    expect(setOutputMock).toHaveBeenCalledTimes(1)
+    expect(setOutputMock).toHaveBeenCalledWith('comment', '- [ ] `bar.txt`')
   })
 
   it('adds a comment with prefix when changed files do not have a code owner', async () => {
@@ -76,13 +66,11 @@ describe('run', () => {
 
     await run()
 
-    expect(createCommentMock).toHaveBeenCalledTimes(1)
-    expect(createCommentMock).toHaveBeenCalledWith({
-      owner: 'worksome',
-      repo: 'enforce-codeowner',
-      issue_number: 123,
-      body: 'The following files do not have code owners:\n- `bar.txt`',
-    })
+    expect(setOutputMock).toHaveBeenCalledTimes(1)
+    expect(setOutputMock).toHaveBeenCalledWith(
+      'comment',
+      'The following files do not have code owners:\n- `bar.txt`'
+    )
   })
 
   it('adds a comment with suffix when changed files do not have a code owner', async () => {
@@ -92,13 +80,11 @@ describe('run', () => {
 
     await run()
 
-    expect(createCommentMock).toHaveBeenCalledTimes(1)
-    expect(createCommentMock).toHaveBeenCalledWith({
-      owner: 'worksome',
-      repo: 'enforce-codeowner',
-      issue_number: 123,
-      body: '- `bar.txt`\n\nThe above files do not have code owners...',
-    })
+    expect(setOutputMock).toHaveBeenCalledTimes(1)
+    expect(setOutputMock).toHaveBeenCalledWith(
+      'comment',
+      '- `bar.txt`\n\nThe above files do not have code owners...'
+    )
   })
 
   it('adds a comment with prefix and suffix when changed files do not have a code owner', async () => {
@@ -109,13 +95,11 @@ describe('run', () => {
 
     await run()
 
-    expect(createCommentMock).toHaveBeenCalledTimes(1)
-    expect(createCommentMock).toHaveBeenCalledWith({
-      owner: 'worksome',
-      repo: 'enforce-codeowner',
-      issue_number: 123,
-      body: 'The following files do not have code owners:\n- `bar.txt`\n\nWow!',
-    })
+    expect(setOutputMock).toHaveBeenCalledTimes(1)
+    expect(setOutputMock).toHaveBeenCalledWith(
+      'comment',
+      'The following files do not have code owners:\n- `bar.txt`\n\nWow!'
+    )
   })
 
   it('does not a comment when all changed files have a code owner', async () => {
@@ -123,7 +107,7 @@ describe('run', () => {
 
     await run()
 
-    expect(createCommentMock).not.toHaveBeenCalled()
+    expect(setOutputMock).not.toHaveBeenCalled()
   })
 })
 

@@ -67,7 +67,7 @@ function run() {
             generateIgnore(ignored, codeOwnersPath);
             const result = yield checkFiles(ignored, changedFiles);
             if (result.length !== 0) {
-                yield postComment(client, prNumber, result, checkboxes, commentPrefix, commentSuffix);
+                yield postComment(result, checkboxes, commentPrefix, commentSuffix);
             }
         }
         catch (error) {
@@ -123,13 +123,12 @@ function checkFiles(ig, changedFiles) {
     });
 }
 exports.checkFiles = checkFiles;
-function postComment(client, prNumber, files, checkboxes, commentPrefix, commentSuffix) {
+function postComment(files, checkboxes, commentPrefix, commentSuffix) {
     return __awaiter(this, void 0, void 0, function* () {
         if (files.length === 0) {
             return;
         }
         const message = [];
-        const issue_number = prNumber;
         if (commentPrefix !== '') {
             message.push(commentPrefix);
         }
@@ -139,12 +138,7 @@ function postComment(client, prNumber, files, checkboxes, commentPrefix, comment
             message.push(`\n${commentSuffix}`);
         }
         const body = message.join('\n');
-        yield client.rest.issues.createComment({
-            owner: github.context.repo.owner,
-            repo: github.context.repo.repo,
-            issue_number,
-            body,
-        });
+        core.setOutput('comment', body);
     });
 }
 exports.postComment = postComment;

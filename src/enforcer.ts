@@ -32,14 +32,7 @@ export async function run(): Promise<void> {
     const result = await checkFiles(ignored, changedFiles)
 
     if (result.length !== 0) {
-      await postComment(
-        client,
-        prNumber,
-        result,
-        checkboxes,
-        commentPrefix,
-        commentSuffix
-      )
+      await postComment(result, checkboxes, commentPrefix, commentSuffix)
     }
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
@@ -107,8 +100,6 @@ export async function checkFiles(
 }
 
 export async function postComment(
-  client: ClientType,
-  prNumber: number,
   files: string[],
   checkboxes: boolean,
   commentPrefix: string,
@@ -119,7 +110,6 @@ export async function postComment(
   }
 
   const message: string[] = []
-  const issue_number = prNumber
 
   if (commentPrefix !== '') {
     message.push(commentPrefix)
@@ -134,12 +124,7 @@ export async function postComment(
 
   const body = message.join('\n')
 
-  await client.rest.issues.createComment({
-    owner: github.context.repo.owner,
-    repo: github.context.repo.repo,
-    issue_number,
-    body,
-  })
+  core.setOutput('comment', body)
 }
 
 function getPrNumber(): number | undefined {
