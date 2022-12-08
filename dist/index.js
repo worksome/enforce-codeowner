@@ -132,7 +132,7 @@ function postComment(client, prNumber, files, commentPrefix, commentSuffix) {
         if (commentPrefix !== '') {
             message.push(commentPrefix);
         }
-        message.push(...files.map((file) => `- ${file}`));
+        message.push(...files.map((file) => `- \`${file}\``));
         if (commentSuffix !== '') {
             message.push(commentSuffix);
         }
