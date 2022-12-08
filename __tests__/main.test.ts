@@ -42,7 +42,7 @@ describe('run', () => {
       owner: 'worksome',
       repo: 'enforce-codeowner',
       issue_number: 123,
-      body: 'The following files do not have code owners:\n- bar.txt',
+      body: 'The following files do not have code owners:\n- `bar.txt`',
     })
   })
 
@@ -58,7 +58,7 @@ describe('run', () => {
       owner: 'worksome',
       repo: 'enforce-codeowner',
       issue_number: 123,
-      body: '- bar.txt\nThe above files do not have code owners...',
+      body: '- `bar.txt`\nThe above files do not have code owners...',
     })
   })
 
@@ -75,7 +75,7 @@ describe('run', () => {
       owner: 'worksome',
       repo: 'enforce-codeowner',
       issue_number: 123,
-      body: 'The following files do not have code owners:\n- bar.txt\nWow!',
+      body: 'The following files do not have code owners:\n- `bar.txt`\nWow!',
     })
   })
 
