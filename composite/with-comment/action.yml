@@ -25,7 +25,7 @@ runs:
 
     - name: Enforce Codeowners
       id: enforce-codeowners
-      uses: worksome/enforce-codeowner@v1
+      uses: worksome/enforce-codeowner@main
       with:
         codeOwnersPath: '.github/CODEOWNERS'
         commentPrefix: |
