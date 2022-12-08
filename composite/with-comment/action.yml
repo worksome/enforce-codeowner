@@ -39,6 +39,7 @@ runs:
         token: ${{ inputs.token }}
 
     - name: Find Existing Comment
+      if: ${{ steps.enforce-codeowners.outputs.comment != '' }}
       uses: peter-evans/find-comment@v2
       id: find-comment
       with:
@@ -47,7 +48,7 @@ runs:
         token: ${{ inputs.token }}
 
     - name: Create comment
-      if: ${{ steps.find-comment.outputs.comment-id == '' }}
+      if: ${{ steps.enforce-codeowners.outputs.comment != '' && steps.find-comment.outputs.comment-id == '' }}
       uses: peter-evans/create-or-update-comment@v2
       with:
         issue-number: ${{ github.event.pull_request.number }}
@@ -57,7 +58,7 @@ runs:
         token: ${{ inputs.token }}
 
     - name: Update Comment
-      if: ${{ steps.find-comment.outputs.comment-id != '' }}
+      if: ${{ steps.enforce-codeowners.outputs.comment != '' && steps.find-comment.outputs.comment-id != '' }}
       uses: peter-evans/create-or-update-comment@v2
       with:
         comment-id: ${{ steps.find-comment.outputs.comment-id }}
