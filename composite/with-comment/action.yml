@@ -1,0 +1,64 @@
+name: Enforce Codeowner with Comment
+
+description: 'Enforce CODEOWNERS entries on PR files'
+
+inputs:
+  codeOwnersPath:
+    description: 'Location of the codeowner file.'
+    default: '.github/CODEOWNERS'
+  commentPrefix:
+    description: 'The message prefix to post on the PR.'
+    default: 'The following files do not have code owners:'
+  commentSuffix:
+    description: 'The message suffix to post on the PR.'
+    default: ''
+  checkboxes:
+    description: 'List the files with checkboxes.'
+    default: false
+  token:
+    description: 'The token used to authenticate with GitHub and post the comments on the PR.'
+    default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
+
+runs:
+  using: 'composite'
+  steps:
+
+    - name: Enforce Codeowners
+      id: enforce-codeowners
+      uses: worksome/enforce-codeowner@v1
+      with:
+        codeOwnersPath: '.github/CODEOWNERS'
+        commentPrefix: |
+          The following files do not have code owners:
+        commentSuffix: ''
+        token: { { secrets.GITHUB_TOKEN } }
+
+    - name: Find Existing Comment
+      uses: peter-evans/find-comment@v2
+      id: find-comment
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        body-includes: '<!-- CODEOWNERS ACTION -->'
+
+    - name: Create comment
+      if: ${{ steps.find-comment.outputs.comment-id == '' }}
+      uses: peter-evans/create-or-update-comment@v2
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        body: |
+          <!-- CODEOWNERS ACTION -->
+          ${{ steps.enforce-codeowners.outputs.comment }}
+
+    - name: Update Comment
+      if: ${{ steps.find-comment.outputs.comment-id != '' }}
+      uses: peter-evans/create-or-update-comment@v2
+      with:
+        comment-id: ${{ steps.find-comment.outputs.comment-id }}
+        edit-mode: replace
+        body: |
+          <!-- CODEOWNERS ACTION -->
+          ${{ steps.enforce-codeowners.outputs.comment }}
+
+branding:
+  icon: 'shield'
+  color: 'gray-dark'

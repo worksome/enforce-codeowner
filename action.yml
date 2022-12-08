@@ -19,6 +19,10 @@ inputs:
     description: 'The token used to authenticate with GitHub and post the comments on the PR.'
     default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
 
+outputs:
+  comment:
+
+
 runs:
   using: 'node16'
   main: 'dist/index.js'
