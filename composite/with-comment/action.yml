@@ -16,7 +16,7 @@ inputs:
     description: 'List the files with checkboxes.'
     default: false
   token:
-    description: 'The token used to authenticate with GitHub and post the comments on the PR.'
+    description: 'The token used to authenticate with GitHub and post the comment on the PR.'
     default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
 
 runs:
@@ -31,7 +31,7 @@ runs:
         commentPrefix: |
           The following files do not have code owners:
         commentSuffix: ''
-        token: { { secrets.GITHUB_TOKEN } }
+        token: ${{ inputs.token }}
 
     - name: Find Existing Comment
       uses: peter-evans/find-comment@v2
@@ -39,6 +39,7 @@ runs:
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body-includes: '<!-- CODEOWNERS ACTION -->'
+        token: ${{ inputs.token }}
 
     - name: Create comment
       if: ${{ steps.find-comment.outputs.comment-id == '' }}
@@ -48,6 +49,7 @@ runs:
         body: |
           <!-- CODEOWNERS ACTION -->
           ${{ steps.enforce-codeowners.outputs.comment }}
+        token: ${{ inputs.token }}
 
     - name: Update Comment
       if: ${{ steps.find-comment.outputs.comment-id != '' }}
@@ -58,6 +60,7 @@ runs:
         body: |
           <!-- CODEOWNERS ACTION -->
           ${{ steps.enforce-codeowners.outputs.comment }}
+        token: ${{ inputs.token }}
 
 branding:
   icon: 'shield'

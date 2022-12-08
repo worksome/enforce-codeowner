@@ -41,5 +41,5 @@ The output comment that should be posted on the pull request.
     commentPrefix: |
       The following files do not have code owners:
     commentSuffix: ''
-    token: {{ secrets.GITHUB_TOKEN }}
+    token: ${{ github.token }}
 ```
