@@ -28,7 +28,7 @@ runs:
 
     - name: Enforce Codeowners
       id: enforce-codeowners
-      uses: worksome/enforce-codeowner@main
+      uses: worksome/enforce-codeowner@v1
       with:
         codeOwnersPath: ${{ inputs.codeOwnersPath }}
         commentPrefix: |
