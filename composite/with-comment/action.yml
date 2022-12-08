@@ -27,10 +27,12 @@ runs:
       id: enforce-codeowners
       uses: worksome/enforce-codeowner@main
       with:
-        codeOwnersPath: '.github/CODEOWNERS'
+        codeOwnersPath: ${{ inputs.codeOwnersPath }}
         commentPrefix: |
-          The following files do not have code owners:
-        commentSuffix: ''
+          ${{ inputs.commentPrefix }}
+        commentSuffix: |
+          ${{ inputs.commentSuffix }}
+        checkboxes: ${{ inputs.checkboxes }}
         token: ${{ inputs.token }}
 
     - name: Find Existing Comment
