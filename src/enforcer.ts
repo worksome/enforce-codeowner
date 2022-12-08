@@ -116,7 +116,7 @@ export async function postComment(
     message.push(commentPrefix)
   }
 
-  message.push(...files.map((file: string) => `- ${file}`))
+  message.push(...files.map((file: string) => `- \`${file}\``))
 
   if (commentSuffix !== '') {
     message.push(commentSuffix)
