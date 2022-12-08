@@ -32,6 +32,8 @@ The output comment that should be posted on the pull request.
 
 ## Example usage
 
+### Using the main action (will not post comments)
+
 ```yaml
 - name: Enforce Codeowners
   id: enforce-codeowners
@@ -41,5 +43,21 @@ The output comment that should be posted on the pull request.
     commentPrefix: |
       The following files do not have code owners:
     commentSuffix: ''
+    checkboxes: true
+    token: ${{ github.token }}
+```
+
+### Using the composite action
+
+```yaml
+- name: Enforce Codeowners
+  id: enforce-codeowners
+  uses: worksome/enforce-codeowner/composite/with-comment@v1
+  with:
+    codeOwnersPath: '.github/CODEOWNERS'
+    commentPrefix: |
+      The following files do not have code owners:
+    commentSuffix: ''
+    checkboxes: true
     token: ${{ github.token }}
 ```
