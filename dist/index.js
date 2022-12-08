@@ -54,6 +54,7 @@ function run() {
             const codeOwnersPath = core.getInput('codeOwnersPath') || '.github/CODEOWNERS';
             const commentPrefix = core.getInput('commentPrefix');
             const commentSuffix = core.getInput('commentSuffix');
+            const checkboxes = core.getBooleanInput('checkboxes');
             const prNumber = getPrNumber();
             if (!prNumber) {
                 console.log('Could not get pull request number from context, exiting');
@@ -66,7 +67,7 @@ function run() {
             generateIgnore(ignored, codeOwnersPath);
             const result = yield checkFiles(ignored, changedFiles);
             if (result.length !== 0) {
-                yield postComment(client, prNumber, result, commentPrefix, commentSuffix);
+                yield postComment(client, prNumber, result, checkboxes, commentPrefix, commentSuffix);
             }
         }
         catch (error) {
@@ -122,7 +123,7 @@ function checkFiles(ig, changedFiles) {
     });
 }
 exports.checkFiles = checkFiles;
-function postComment(client, prNumber, files, commentPrefix, commentSuffix) {
+function postComment(client, prNumber, files, checkboxes, commentPrefix, commentSuffix) {
     return __awaiter(this, void 0, void 0, function* () {
         if (files.length === 0) {
             return;
@@ -132,9 +133,10 @@ function postComment(client, prNumber, files, commentPrefix, commentSuffix) {
         if (commentPrefix !== '') {
             message.push(commentPrefix);
         }
-        message.push(...files.map((file) => `- \`${file}\``));
+        const linePrefix = checkboxes ? '- [ ]' : '-';
+        message.push(...files.map((file) => `${linePrefix} \`${file}\``));
         if (commentSuffix !== '') {
-            message.push(commentSuffix);
+            message.push(`\n${commentSuffix}`);
         }
         const body = message.join('\n');
         yield client.rest.issues.createComment({

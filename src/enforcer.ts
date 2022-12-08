@@ -12,6 +12,7 @@ export async function run(): Promise<void> {
       core.getInput('codeOwnersPath') || '.github/CODEOWNERS'
     const commentPrefix: string = core.getInput('commentPrefix')
     const commentSuffix: string = core.getInput('commentSuffix')
+    const checkboxes: boolean = core.getBooleanInput('checkboxes')
 
     const prNumber = getPrNumber()
     if (!prNumber) {
@@ -31,7 +32,14 @@ export async function run(): Promise<void> {
     const result = await checkFiles(ignored, changedFiles)
 
     if (result.length !== 0) {
-      await postComment(client, prNumber, result, commentPrefix, commentSuffix)
+      await postComment(
+        client,
+        prNumber,
+        result,
+        checkboxes,
+        commentPrefix,
+        commentSuffix
+      )
     }
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
@@ -102,6 +110,7 @@ export async function postComment(
   client: ClientType,
   prNumber: number,
   files: string[],
+  checkboxes: boolean,
   commentPrefix: string,
   commentSuffix: string
 ): Promise<void> {
@@ -116,10 +125,11 @@ export async function postComment(
     message.push(commentPrefix)
   }
 
-  message.push(...files.map((file: string) => `- \`${file}\``))
+  const linePrefix: string = checkboxes ? '- [ ]' : '-'
+  message.push(...files.map((file: string) => `${linePrefix} \`${file}\``))
 
   if (commentSuffix !== '') {
-    message.push(commentSuffix)
+    message.push(`\n${commentSuffix}`)
   }
 
   const body = message.join('\n')

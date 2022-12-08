@@ -16,6 +16,10 @@ The message prefix to post on the PR.
 
 The message suffix to post on the PR.
 
+### `checkboxes`
+
+Enable checkboxes when listing the files in the comment. The default value is `false`.
+
 ### `token`
 
 The token used to authenticate with GitHub and post the comments on the PR. Defaults to `github.token`.
