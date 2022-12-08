@@ -18,18 +18,57 @@ const mockInput = {
   commentSuffix: '',
 }
 
+const mockBooleanInput = {
+  checkboxes: false,
+}
+
 jest
   .spyOn(core, 'getInput')
   .mockImplementation((name: string, ...opts) => mockInput[name])
+
+jest
+  .spyOn(core, 'getBooleanInput')
+  .mockImplementation((name: string, ...opts) => mockBooleanInput[name])
 
 beforeEach(() => {
   mockInput.token = '_'
   mockInput.codeOwnersPath = `${__dirname}/fixtures/CODEOWNERS`
   mockInput.commentPrefix = ''
   mockInput.commentSuffix = ''
+  mockBooleanInput.checkboxes = false
 })
 
 describe('run', () => {
+  it('adds a comment when changed files do not have a code owner', async () => {
+    mockGitHubResponseChangedFiles('bar.txt')
+
+    await run()
+
+    expect(createCommentMock).toHaveBeenCalledTimes(1)
+    expect(createCommentMock).toHaveBeenCalledWith({
+      owner: 'worksome',
+      repo: 'enforce-codeowner',
+      issue_number: 123,
+      body: '- `bar.txt`',
+    })
+  })
+
+  it('adds a comment with checkboxes when changed files do not have a code owner', async () => {
+    mockGitHubResponseChangedFiles('bar.txt')
+
+    mockBooleanInput.checkboxes = true
+
+    await run()
+
+    expect(createCommentMock).toHaveBeenCalledTimes(1)
+    expect(createCommentMock).toHaveBeenCalledWith({
+      owner: 'worksome',
+      repo: 'enforce-codeowner',
+      issue_number: 123,
+      body: '- [ ] `bar.txt`',
+    })
+  })
+
   it('adds a comment with prefix when changed files do not have a code owner', async () => {
     mockGitHubResponseChangedFiles('bar.txt')
 
@@ -58,7 +97,7 @@ describe('run', () => {
       owner: 'worksome',
       repo: 'enforce-codeowner',
       issue_number: 123,
-      body: '- `bar.txt`\nThe above files do not have code owners...',
+      body: '- `bar.txt`\n\nThe above files do not have code owners...',
     })
   })
 
@@ -75,7 +114,7 @@ describe('run', () => {
       owner: 'worksome',
       repo: 'enforce-codeowner',
       issue_number: 123,
-      body: 'The following files do not have code owners:\n- `bar.txt`\nWow!',
+      body: 'The following files do not have code owners:\n- `bar.txt`\n\nWow!',
     })
   })
 
