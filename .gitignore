@@ -1,4 +1,6 @@
-node_modules
-.vscode
-dist
-coverage
+.vscode/
+coverage/
+lib/
+node_modules/
+package-lock.json
+yarn.lock

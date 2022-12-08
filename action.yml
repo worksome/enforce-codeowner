@@ -1,12 +1,25 @@
-name: enforce-codeowner
-description: 'Enforce codeowner on PR'
+name: Enforce Codeowner
+
+description: 'Enforce CODEOWNERS entries on PR files'
+
 inputs:
-  CODEOWNERS_PATH:
+  codeOwnersPath:
     description: 'Location of the codeowner file.'
     default: '.github/CODEOWNERS'
-  POST_COMMENT:
-    description: 'Post a comment to the PR if the files changed do not have a code owner'
-    default: true
+  commentPrefix:
+    description: 'The message prefix to post on the PR.'
+    default: 'The following files do not have code owners:'
+  commentSuffix:
+    description: 'The message suffix to post on the PR.'
+    default: ''
+  token:
+    description: 'The token used to authenticate with GitHub and post the comments on the PR.'
+    default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
+
 runs:
-  using: 'node12'
-  main: 'index.js'
+  using: 'node16'
+  main: 'dist/index.js'
+
+branding:
+  icon: 'shield'
+  color: 'gray-dark'
