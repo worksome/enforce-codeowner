@@ -20,6 +20,7 @@ const mockInput = {
 
 const mockBooleanInput = {
   checkboxes: false,
+  includeDeleted: false,
 }
 
 jest
@@ -36,6 +37,7 @@ beforeEach(() => {
   mockInput.commentPrefix = ''
   mockInput.commentSuffix = ''
   mockBooleanInput.checkboxes = false
+  mockBooleanInput.includeDeleted = false
 })
 
 describe('run', () => {

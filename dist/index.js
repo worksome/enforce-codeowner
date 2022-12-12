@@ -52,9 +52,10 @@ function run() {
         try {
             const token = core.getInput('token', { required: true });
             const codeOwnersPath = core.getInput('codeOwnersPath') || '.github/CODEOWNERS';
-            const commentPrefix = core.getInput('commentPrefix');
-            const commentSuffix = core.getInput('commentSuffix');
-            const checkboxes = core.getBooleanInput('checkboxes');
+            const commentPrefix = core.getInput('commentPrefix') || '';
+            const commentSuffix = core.getInput('commentSuffix') || '';
+            const checkboxes = core.getBooleanInput('checkboxes') || false;
+            const includeDeleted = core.getBooleanInput('includeDeleted') || false;
             const prNumber = getPrNumber();
             if (!prNumber) {
                 console.log('Could not get pull request number from context, exiting');
@@ -62,7 +63,7 @@ function run() {
             }
             const client = github.getOctokit(token);
             core.debug(`fetching changed files for pr #${prNumber}`);
-            const changedFiles = yield getChangedFiles(client, prNumber);
+            const changedFiles = yield getChangedFiles(client, prNumber, includeDeleted);
             const ignored = (0, ignore_1.default)();
             generateIgnore(ignored, codeOwnersPath);
             const result = yield checkFiles(ignored, changedFiles);
@@ -91,7 +92,7 @@ function generateIgnore(ig, codeOwnerPath) {
     });
 }
 exports.generateIgnore = generateIgnore;
-function getChangedFiles(client, prNumber) {
+function getChangedFiles(client, prNumber, includeDeleted) {
     return __awaiter(this, void 0, void 0, function* () {
         const listFilesOptions = client.rest.pulls.listFiles.endpoint.merge({
             owner: github.context.repo.owner,
@@ -99,7 +100,9 @@ function getChangedFiles(client, prNumber) {
             pull_number: prNumber,
         });
         const listFilesResponse = yield client.paginate(listFilesOptions);
-        const changedFiles = listFilesResponse.map((f) => f.filename);
+        const changedFiles = listFilesResponse
+            .filter((f) => includeDeleted || f.status !== 'deleted')
+            .map((f) => f.filename);
         core.debug('Found changed files:');
         for (const file of changedFiles) {
             core.debug(`  ${file}`);
