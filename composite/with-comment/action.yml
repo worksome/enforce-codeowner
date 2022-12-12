@@ -15,6 +15,9 @@ inputs:
   checkboxes:
     description: 'List the files with checkboxes.'
     default: false
+  includeDeleted:
+    description: 'Include deleted files.'
+    default: false
   custom-comment-identifier:
     description: 'A string that will be used to identify existing comments to update.'
     default: 'CODEOWNERS ACTION'

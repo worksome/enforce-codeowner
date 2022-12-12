@@ -10,9 +10,11 @@ export async function run(): Promise<void> {
     const token: string = core.getInput('token', { required: true })
     const codeOwnersPath: string =
       core.getInput('codeOwnersPath') || '.github/CODEOWNERS'
-    const commentPrefix: string = core.getInput('commentPrefix')
-    const commentSuffix: string = core.getInput('commentSuffix')
-    const checkboxes: boolean = core.getBooleanInput('checkboxes')
+    const commentPrefix: string = core.getInput('commentPrefix') || ''
+    const commentSuffix: string = core.getInput('commentSuffix') || ''
+    const checkboxes: boolean = core.getBooleanInput('checkboxes') || false
+    const includeDeleted: boolean =
+      core.getBooleanInput('includeDeleted') || false
 
     const prNumber = getPrNumber()
     if (!prNumber) {
@@ -23,7 +25,11 @@ export async function run(): Promise<void> {
     const client: ClientType = github.getOctokit(token)
 
     core.debug(`fetching changed files for pr #${prNumber}`)
-    const changedFiles: string[] = await getChangedFiles(client, prNumber)
+    const changedFiles: string[] = await getChangedFiles(
+      client,
+      prNumber,
+      includeDeleted
+    )
 
     const ignored = ignore()
 
@@ -59,7 +65,8 @@ export function generateIgnore(ig: Ignore, codeOwnerPath: string): void {
 
 async function getChangedFiles(
   client: ClientType,
-  prNumber: number
+  prNumber: number,
+  includeDeleted: boolean
 ): Promise<string[]> {
   const listFilesOptions = client.rest.pulls.listFiles.endpoint.merge({
     owner: github.context.repo.owner,
@@ -67,8 +74,10 @@ async function getChangedFiles(
     pull_number: prNumber,
   })
 
-  const listFilesResponse = await client.paginate(listFilesOptions)
-  const changedFiles = listFilesResponse.map((f: any) => f.filename)
+  const listFilesResponse: any[] = await client.paginate(listFilesOptions)
+  const changedFiles: string[] = listFilesResponse
+    .filter((f: any) => includeDeleted || f.status !== 'deleted')
+    .map((f: any) => f.filename)
 
   core.debug('Found changed files:')
   for (const file of changedFiles) {
