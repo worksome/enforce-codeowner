@@ -18,6 +18,9 @@ inputs:
   includeDeleted:
     description: 'Include deleted files.'
     default: false
+  ignoredFiles:
+    description: 'A new-line-separated list of ignored files.'
+    default: ''
   token:
     description: 'The token used to authenticate with GitHub and post the comments on the PR.'
     default: ${{ github.server_url == 'https://github.com' && github.token || '' }}

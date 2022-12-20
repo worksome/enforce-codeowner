@@ -18,6 +18,9 @@ inputs:
   includeDeleted:
     description: 'Include deleted files.'
     default: false
+  ignoredFiles:
+    description: 'A new-line-separated list of ignored files.'
+    default: ''
   custom-comment-identifier:
     description: 'A string that will be used to identify existing comments to update.'
     default: 'CODEOWNERS ACTION'
@@ -39,6 +42,9 @@ runs:
         commentSuffix: |
           ${{ inputs.commentSuffix }}
         checkboxes: ${{ inputs.checkboxes }}
+        includeDeleted: ${{ inputs.includeDeleted }}
+        ignoredFiles: |
+          ${{ inputs.ignoredFiles }}
         token: ${{ inputs.token }}
 
     - name: Find Existing Comment

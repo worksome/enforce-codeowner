@@ -1,4 +1,4 @@
-import { checkFiles, generateIgnore } from '../src/enforcer'
+import { checkFiles, generateIgnore, getIgnoredFiles } from '../src/enforcer'
 
 import * as core from '@actions/core'
 import ignore, { Ignore } from 'ignore'
@@ -31,5 +31,16 @@ describe('checkFiles', () => {
     const result = await checkFiles(codeOwners, changedFiles)
 
     expect(result).toEqual(['bar.txt'])
+  })
+})
+
+describe('ignoredFiles', () => {
+  it('returns an empty array when all files have a code owner', async () => {
+    const result = await getIgnoredFiles(`
+foo.txt
+bar.txt
+    `)
+
+    expect(result).toEqual(['foo.txt', 'bar.txt'])
   })
 })
