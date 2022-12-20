@@ -24,6 +24,10 @@ Enable checkboxes when listing the files in the comment. The default value is `f
 
 Enable the inclusion of deleted files when checking for code owners. The default value is `false`.
 
+### `ignoredFiles`
+
+Ignore specific files using a new-line-separated list of files.
+
 ### `token`
 
 The token used to authenticate with GitHub and post the comments on the PR. Defaults to `github.token`.
@@ -49,6 +53,9 @@ The output comment that should be posted on the pull request.
     commentSuffix: ''
     checkboxes: true
     includeDeleted: false
+    ignoredFiles: |
+      README.md
+      composer.json
     token: ${{ github.token }}
 ```
 
@@ -65,5 +72,8 @@ The output comment that should be posted on the pull request.
     commentSuffix: ''
     checkboxes: true
     includeDeleted: false
+    ignoredFiles: |
+      README.md
+      composer.json
     token: ${{ github.token }}
 ```

@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.postComment = exports.checkFiles = exports.generateIgnore = exports.run = void 0;
+exports.postComment = exports.checkFiles = exports.getIgnoredFiles = exports.generateIgnore = exports.run = void 0;
 const fs_1 = __nccwpck_require__(7147);
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
@@ -56,6 +56,7 @@ function run() {
             const commentSuffix = core.getInput('commentSuffix') || '';
             const checkboxes = core.getBooleanInput('checkboxes') || false;
             const includeDeleted = core.getBooleanInput('includeDeleted') || false;
+            const ignoredFiles = yield getIgnoredFiles(core.getInput('ignoredFiles') || '');
             const prNumber = getPrNumber();
             if (!prNumber) {
                 console.log('Could not get pull request number from context, exiting');
@@ -66,6 +67,7 @@ function run() {
             const changedFiles = yield getChangedFiles(client, prNumber, includeDeleted);
             const ignored = (0, ignore_1.default)();
             generateIgnore(ignored, codeOwnersPath);
+            ignoredFiles.forEach((ignoredFile) => ignored.add(ignoredFile));
             const result = yield checkFiles(ignored, changedFiles);
             if (result.length !== 0) {
                 yield postComment(result, checkboxes, commentPrefix, commentSuffix);
@@ -103,13 +105,36 @@ function getChangedFiles(client, prNumber, includeDeleted) {
         const changedFiles = listFilesResponse
             .filter((f) => includeDeleted || f.status !== 'deleted')
             .map((f) => f.filename);
-        core.debug('Found changed files:');
-        for (const file of changedFiles) {
-            core.debug(`  ${file}`);
+        if (changedFiles.length > 0) {
+            core.debug('Found changed files:');
+            for (const file of changedFiles) {
+                core.debug(`  ${file}`);
+            }
+        }
+        else {
+            core.debug('No changed files were found.');
         }
         return changedFiles;
     });
 }
+function getIgnoredFiles(ignoredLinesList) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const ignoredFiles = ignoredLinesList
+            .split('\n')
+            .filter((ignoredFile) => ignoredFile.trim().length > 0);
+        if (ignoredFiles.length > 0) {
+            core.debug('Ignoring files:');
+            for (const file of ignoredFiles) {
+                core.debug(`  ${file}`);
+            }
+        }
+        else {
+            core.debug('No ignored files were found.');
+        }
+        return ignoredFiles;
+    });
+}
+exports.getIgnoredFiles = getIgnoredFiles;
 function checkFiles(ig, changedFiles) {
     return __awaiter(this, void 0, void 0, function* () {
         const failedList = [];

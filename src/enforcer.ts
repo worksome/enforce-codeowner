@@ -1,7 +1,8 @@
-import { existsSync, readFileSync } from 'fs'
+import { existsSync, readFileSync, createReadStream } from 'fs'
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import ignore, { Ignore } from 'ignore'
+import * as readline from 'readline'
 
 type ClientType = ReturnType<typeof github.getOctokit>
 
@@ -15,6 +16,10 @@ export async function run(): Promise<void> {
     const checkboxes: boolean = core.getBooleanInput('checkboxes') || false
     const includeDeleted: boolean =
       core.getBooleanInput('includeDeleted') || false
+
+    const ignoredFiles: string[] = await getIgnoredFiles(
+      core.getInput('ignoredFiles') || ''
+    )
 
     const prNumber = getPrNumber()
     if (!prNumber) {
@@ -34,6 +39,8 @@ export async function run(): Promise<void> {
     const ignored = ignore()
 
     generateIgnore(ignored, codeOwnersPath)
+
+    ignoredFiles.forEach((ignoredFile: string) => ignored.add(ignoredFile))
 
     const result = await checkFiles(ignored, changedFiles)
 
@@ -79,12 +86,35 @@ async function getChangedFiles(
     .filter((f: any) => includeDeleted || f.status !== 'deleted')
     .map((f: any) => f.filename)
 
-  core.debug('Found changed files:')
-  for (const file of changedFiles) {
-    core.debug(`  ${file}`)
+  if (changedFiles.length > 0) {
+    core.debug('Found changed files:')
+    for (const file of changedFiles) {
+      core.debug(`  ${file}`)
+    }
+  } else {
+    core.debug('No changed files were found.')
   }
 
   return changedFiles
+}
+
+export async function getIgnoredFiles(
+  ignoredLinesList: string
+): Promise<string[]> {
+  const ignoredFiles: string[] = ignoredLinesList
+    .split('\n')
+    .filter((ignoredFile: string) => ignoredFile.trim().length > 0)
+
+  if (ignoredFiles.length > 0) {
+    core.debug('Ignoring files:')
+    for (const file of ignoredFiles) {
+      core.debug(`  ${file}`)
+    }
+  } else {
+    core.debug('No ignored files were found.')
+  }
+
+  return ignoredFiles
 }
 
 export async function checkFiles(
