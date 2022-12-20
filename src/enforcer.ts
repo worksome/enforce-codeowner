@@ -103,7 +103,8 @@ export async function getIgnoredFiles(
 ): Promise<string[]> {
   const ignoredFiles: string[] = ignoredLinesList
     .split('\n')
-    .filter((ignoredFile: string) => ignoredFile.trim().length > 0)
+    .map((ignoredFile: string) => ignoredFile.trim())
+    .filter((ignoredFile: string) => ignoredFile.length > 0)
 
   if (ignoredFiles.length > 0) {
     core.debug('Ignoring files:')

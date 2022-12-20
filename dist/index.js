@@ -121,7 +121,8 @@ function getIgnoredFiles(ignoredLinesList) {
     return __awaiter(this, void 0, void 0, function* () {
         const ignoredFiles = ignoredLinesList
             .split('\n')
-            .filter((ignoredFile) => ignoredFile.trim().length > 0);
+            .map((ignoredFile) => ignoredFile.trim())
+            .filter((ignoredFile) => ignoredFile.length > 0);
         if (ignoredFiles.length > 0) {
             core.debug('Ignoring files:');
             for (const file of ignoredFiles) {
