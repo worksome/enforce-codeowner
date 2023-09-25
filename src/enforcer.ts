@@ -1,8 +1,7 @@
-import { existsSync, readFileSync, createReadStream } from 'fs'
+import { existsSync, readFileSync } from 'fs'
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import ignore, { Ignore } from 'ignore'
-import * as readline from 'readline'
 
 type ClientType = ReturnType<typeof github.getOctokit>
 
