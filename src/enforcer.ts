@@ -1,8 +1,7 @@
-import { existsSync, readFileSync, createReadStream } from 'fs'
+import { existsSync, readFileSync } from 'fs'
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import ignore, { Ignore } from 'ignore'
-import * as readline from 'readline'
 
 type ClientType = ReturnType<typeof github.getOctokit>
 
@@ -75,16 +74,15 @@ async function getChangedFiles(
   prNumber: number,
   includeDeleted: boolean
 ): Promise<string[]> {
-  const listFilesOptions = client.rest.pulls.listFiles.endpoint.merge({
+  const listFilesResponse = await client.paginate(client.rest.pulls.listFiles, {
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
     pull_number: prNumber,
   })
 
-  const listFilesResponse: any[] = await client.paginate(listFilesOptions)
   const changedFiles: string[] = listFilesResponse
-    .filter((f: any) => includeDeleted || f.status !== 'deleted')
-    .map((f: any) => f.filename)
+    .filter((file) => includeDeleted || file.status !== 'removed')
+    .map((file) => file.filename)
 
   if (changedFiles.length > 0) {
     core.debug('Found changed files:')
