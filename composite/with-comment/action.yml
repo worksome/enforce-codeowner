@@ -14,10 +14,10 @@ inputs:
     default: ''
   checkboxes:
     description: 'List the files with checkboxes.'
-    default: false
+    default: 'false'
   includeDeleted:
     description: 'Include deleted files.'
-    default: false
+    default: 'false'
   ignoredFiles:
     description: 'A new-line-separated list of ignored files.'
     default: ''
@@ -34,22 +34,22 @@ runs:
 
     - name: Enforce Codeowners
       id: enforce-codeowners
-      uses: worksome/enforce-codeowner@v1
-      with:
-        codeOwnersPath: ${{ inputs.codeOwnersPath }}
-        commentPrefix: |
-          ${{ inputs.commentPrefix }}
-        commentSuffix: |
-          ${{ inputs.commentSuffix }}
-        checkboxes: ${{ inputs.checkboxes }}
-        includeDeleted: ${{ inputs.includeDeleted }}
-        ignoredFiles: |
-          ${{ inputs.ignoredFiles }}
-        token: ${{ inputs.token }}
+      # `uses: ./` would resolve against the caller's workspace rather than this repository, so run the
+      # bundled action from the same checkout as this composite, passing inputs the way the runner would.
+      shell: bash
+      run: node "$GITHUB_ACTION_PATH/../../dist/index.js"
+      env:
+        INPUT_CODEOWNERSPATH: ${{ inputs.codeOwnersPath }}
+        INPUT_COMMENTPREFIX: ${{ inputs.commentPrefix }}
+        INPUT_COMMENTSUFFIX: ${{ inputs.commentSuffix }}
+        INPUT_CHECKBOXES: ${{ inputs.checkboxes }}
+        INPUT_INCLUDEDELETED: ${{ inputs.includeDeleted }}
+        INPUT_IGNOREDFILES: ${{ inputs.ignoredFiles }}
+        INPUT_TOKEN: ${{ inputs.token }}
 
     - name: Find Existing Comment
       if: ${{ steps.enforce-codeowners.outputs.comment != '' }}
-      uses: peter-evans/find-comment@v4
+      uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
       id: find-comment
       with:
         issue-number: ${{ github.event.pull_request.number }}
@@ -58,7 +58,7 @@ runs:
 
     - name: Create comment
       if: ${{ steps.enforce-codeowners.outputs.comment != '' && steps.find-comment.outputs.comment-id == '' }}
-      uses: peter-evans/create-or-update-comment@v5
+      uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body: |
@@ -68,7 +68,7 @@ runs:
 
     - name: Update Comment
       if: ${{ steps.enforce-codeowners.outputs.comment != '' && steps.find-comment.outputs.comment-id != '' }}
-      uses: peter-evans/create-or-update-comment@v5
+      uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
       with:
         comment-id: ${{ steps.find-comment.outputs.comment-id }}
         edit-mode: replace
